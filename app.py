@@ -40,7 +40,7 @@ class ChestXRayClassifier:
             raise ValueError("Invalid disease type selected!")
 
         # Model setup (using EfficientNet as base)
-        self.model = models.efficientnet_b0(pretrained=True)
+        self.model = models.efficientnet_b0(weights='IMAGENET1K_V1')
         self.model.features = nn.Sequential(self.model.features, SEBlock(1280))
         num_ftrs = self.model.classifier[1].in_features
         self.model.classifier = nn.Sequential(
@@ -80,7 +80,7 @@ class ChestXRayClassifier:
 
 # Streamlit interface
 def main():
-    st.set_page_config(page_title="Chest X-Ray Disease Classifier", layout="wide")
+    st.set_page_config(page_title="LungScanAI", layout="wide")
     
     # Styling with background image, transparent black overlay, and content layer
     st.markdown(
@@ -168,7 +168,7 @@ def main():
     st.markdown('<div class="background-overlay"></div>', unsafe_allow_html=True)
 
     # Header section
-    st.markdown('<div class="header">Chest X-Ray Disease Classifier</div>', unsafe_allow_html=True)
+    st.markdown('<div class="header">LungScanAI : Chest X-Ray Disease Classifier</div>', unsafe_allow_html=True)
 
     # Create two columns
     col1, col2 = st.columns([1, 1.5])
