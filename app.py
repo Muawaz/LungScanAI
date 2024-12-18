@@ -88,7 +88,7 @@ def main():
         <style>
         /* Background image */
         .stApp {
-            background-image: url("https://img.freepik.com/free-photo/photo-wall-texture-pattern_58702-12567.jpg");
+            background-image: url("https://img.freepik.com/premium-photo/essential-diagnostics-lung-health-medical-research-clinical-care-concept-pulmonary-function-tests-chest-xray-ct-scan-bronchoscopy-blood-gas-analysis_864588-72767.jpg?w=1380");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -103,7 +103,7 @@ def main():
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Black overlay with 60% opacity */
+            background: rgba(0, 0, 0, 0.0); /* Black overlay with 60% opacity */
             z-index: -1; /* Ensure it stays behind the content */
         }
 
