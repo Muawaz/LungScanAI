@@ -5,25 +5,7 @@ from PIL import Image
 import torch.nn as nn
 import os
 
-# SEBlock definition (same as in your code)
-class SEBlock(nn.Module):
-    def __init__(self, channel, reduction=16):
-        super(SEBlock, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channel, channel // reduction, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channel // reduction, channel, bias=False),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y.expand_as(x)
-
-# ChestXRayClassifier definition (same as your code)
+# ChestXRayClassifier definition (updated according to your model)
 class ChestXRayClassifier:
     def __init__(self, disease_type, device='cuda'):
         self.device = device
@@ -41,10 +23,11 @@ class ChestXRayClassifier:
 
         # Model setup (using EfficientNet as base)
         self.model = models.efficientnet_b0(weights='IMAGENET1K_V1')
-        self.model.features = nn.Sequential(self.model.features, SEBlock(1280))
+
+        # Custom Classifier
         num_ftrs = self.model.classifier[1].in_features
         self.model.classifier = nn.Sequential(
-            nn.Dropout(0.4),
+            nn.Dropout(0.3),  # Increased dropout
             nn.Linear(num_ftrs, 1024),
             nn.ReLU(),
             nn.BatchNorm1d(1024),
@@ -52,16 +35,23 @@ class ChestXRayClassifier:
             nn.Linear(1024, 512),
             nn.ReLU(),
             nn.BatchNorm1d(512),
-            nn.Dropout(0.3),
-            nn.Linear(512, len(self.classes))  # Output layer for the binary classification
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),  # Additional layer
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Dropout(0.1),
+            nn.Linear(256, len(self.classes))  # Adjusting output for binary classification (len(self.classes) = 2)
         )
         self.model = self.model.to(self.device)
         
         # Load the trained model weights (assumes the file is in the current directory)
         checkpoint = torch.load("best_model.pth", map_location=self.device, weights_only=True)
+        
+        # Load weights for feature extractor only (exclude classifier)
         state_dict = checkpoint['model_state_dict']
-        state_dict = {k: v for k, v in state_dict.items() if 'classifier.9' not in k}
+        state_dict = {k: v for k, v in state_dict.items() if 'classifier' not in k}  # Exclude classifier weights
         self.model.load_state_dict(state_dict, strict=False)
+        
         self.model.eval()  # Set model to evaluation mode
 
     def predict(self, image):
